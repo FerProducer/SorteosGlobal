@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sorteo de Boletos</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
@@ -137,15 +137,15 @@
     <section>
       <h2>Formulario de Compra</h2>
       <form id="formulario">
-        <input type="text" id="nombre" placeholder="Nombre completo" required />
-        <input type="tel" id="telefono" placeholder="Número de teléfono" required />
+        <input type="text" id="nombre" placeholder="Nombre completo" required>
+        <input type="tel" id="telefono" placeholder="Número de teléfono" required>
         <textarea id="seleccionados" rows="4" readonly placeholder="Boletos seleccionados..."></textarea>
         <button type="submit">Confirmar y pagar por WhatsApp</button>
       </form>
     </section>
   </div>
-  <a class="whatsapp-button" href="https://wa.me/5216392331644" target="_blank" title="Contactar por WhatsApp">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" />
+  <a class="whatsapp-button" href="https://wa.me/5216392331644" target="_blank">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
   </a>
   <footer>
     <p>&copy; 2025 Sorteo Legal. Todos los derechos reservados.</p>
@@ -164,9 +164,8 @@
     const boletosPorBloque = 1000;
     const seleccionados = new Set();
 
-    // Ejemplo: boletos vendidos y en proceso. Aquí luego se integrará Google Sheets.
-    const boletosVendidos = ["", "01013", "02050"];
-    const boletosEnProceso = [""];
+    const boletosVendidos = [];
+    const boletosEnProceso = [];
 
     function formatoBoleto(n) {
       return n.toString().padStart(5, '0');
@@ -223,16 +222,28 @@
 
     formulario.addEventListener('submit', (e) => {
       e.preventDefault();
-      if(seleccionados.size === 0) {
-        alert("Por favor selecciona al menos un boleto.");
-        return;
-      }
+
       const nombre = nombreInput.value.trim();
       const telefono = telefonoInput.value.trim();
       const boletos = Array.from(seleccionados).join(', ');
+
+      if (!nombre || !telefono || seleccionados.size === 0) {
+        alert("Por favor completa todos los campos y selecciona al menos un boleto.");
+        return;
+      }
+
+      fetch('https://script.google.com/macros/s/AKfycbwlvdm0pA4AokN1qZy-gmmYvIn0smfY3-4myf44IrfAw140cXJ0DndUZyF3ID0tR2Xx/exec', {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ nombre, telefono, boletos })
+      });
+
       const mensaje = `Hola, quiero comprar los boletos: ${boletos}.\nMi nombre es ${nombre}, mi teléfono es ${telefono}`;
-      const tuNumero = '5216392331644'; // <-- Tu número de WhatsApp
-      const link = `https://wa.me/${tuNumero}?text=${encodeURIComponent(mensaje)}`;
+      const numeroWhatsApp = '5216392331644';
+      const link = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
       window.open(link, '_blank');
     });
 
@@ -240,3 +251,4 @@
   </script>
 </body>
 </html>
+
