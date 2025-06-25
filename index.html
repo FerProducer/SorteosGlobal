@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sorteo de Boletos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+      background-color: #111;
+      color: #fff;
+    }
+    header, footer {
+      background: #000;
+      padding: 1rem;
+      text-align: center;
+    }
+    h1, h2 {
+      color: #D4AF37;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+    .bloques {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+    }
+    .bloque-btn {
+      background-color: #1c1c1c;
+      border: 2px solid #D4AF37;
+      color: #fff;
+      padding: 1rem 2rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .bloque-btn:hover {
+      background-color: #333;
+      transform: scale(1.05);
+    }
+    .boletos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+      gap: 0.5rem;
+      margin-top: 2rem;
+    }
+    .boleto {
+      padding: 0.75rem;
+      text-align: center;
+      border: 2px solid #fff;
+      border-radius: 8px;
+      transition: transform 0.2s, background 0.2s;
+      cursor: pointer;
+    }
+    .boleto:hover {
+      transform: scale(1.05);
+    }
+    .disponible {
+      background: #1c1c1c;
+      border-color: #0f0;
+    }
+    .vendido {
+      background: #331111;
+      border-color: red;
+      color: #888;
+      pointer-events: none;
+    }
+    .proceso {
+      background: #3a3200;
+      border-color: #ff0;
+    }
+    form {
+      margin-top: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    input, textarea, button {
+      padding: 0.75rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    input, textarea {
+      background: #222;
+      color: #fff;
+    }
+    button {
+      background: #D4AF37;
+      color: #111;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #e6c865;
+    }
+    .whatsapp-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #25D366;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    .whatsapp-button img {
+      width: 30px;
+      height: 30px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Sorteo de Boletos</h1>
+  </header>
+  <div class="container">
+    <section id="bloques-section">
+      <h2>Selecciona un bloque</h2>
+      <div class="bloques" id="bloques"></div>
+    </section>
+    <section id="boletos-section" style="display:none">
+      <h2>Boletos del bloque <span id="bloque-actual"></span></h2>
+      <button onclick="mostrarBloques()">← Volver a bloques</button>
+      <div class="boletos" id="boletos"></div>
+    </section>
+    <section>
+      <h2>Formulario de Compra</h2>
+      <form id="formulario">
+        <input type="text" id="nombre" placeholder="Nombre completo" required />
+        <input type="tel" id="telefono" placeholder="Número de teléfono" required />
+        <textarea id="seleccionados" rows="4" readonly placeholder="Boletos seleccionados..."></textarea>
+        <button type="submit">Confirmar y pagar por WhatsApp</button>
+      </form>
+    </section>
+  </div>
+  <a class="whatsapp-button" href="https://wa.me/5216392331644" target="_blank" title="Contactar por WhatsApp">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" />
+  </a>
+  <footer>
+    <p>&copy; 2025 Sorteo Legal. Todos los derechos reservados.</p>
+  </footer>
+  <script>
+    const bloquesContainer = document.getElementById('bloques');
+    const boletosSection = document.getElementById('boletos-section');
+    const boletosContainer = document.getElementById('boletos');
+    const seleccionadosInput = document.getElementById('seleccionados');
+    const formulario = document.getElementById('formulario');
+    const nombreInput = document.getElementById('nombre');
+    const telefonoInput = document.getElementById('telefono');
+    const bloqueActualSpan = document.getElementById('bloque-actual');
+
+    const totalBoletos = 50000;
+    const boletosPorBloque = 1000;
+    const seleccionados = new Set();
+
+    // Ejemplo: boletos vendidos y en proceso. Aquí luego se integrará Google Sheets.
+    const boletosVendidos = ["", "01013", "02050"];
+    const boletosEnProceso = [""];
+
+    function formatoBoleto(n) {
+      return n.toString().padStart(5, '0');
+    }
+
+    function crearBotonesBloques() {
+      for (let i = 0; i < totalBoletos; i += boletosPorBloque) {
+        const fin = i + boletosPorBloque - 1;
+        const btn = document.createElement('button');
+        btn.className = 'bloque-btn';
+        btn.textContent = `${formatoBoleto(i)} – ${formatoBoleto(fin)}`;
+        btn.onclick = () => mostrarBoletosDelBloque(i);
+        bloquesContainer.appendChild(btn);
+      }
+    }
+
+    function mostrarBloques() {
+      boletosSection.style.display = 'none';
+      document.getElementById('bloques-section').style.display = 'block';
+      boletosContainer.innerHTML = '';
+    }
+
+    function mostrarBoletosDelBloque(inicio) {
+      bloqueActualSpan.textContent = `${formatoBoleto(inicio)} – ${formatoBoleto(inicio + boletosPorBloque - 1)}`;
+      boletosContainer.innerHTML = '';
+      document.getElementById('bloques-section').style.display = 'none';
+      boletosSection.style.display = 'block';
+
+      for (let i = inicio; i < inicio + boletosPorBloque; i++) {
+        const num = formatoBoleto(i);
+        const div = document.createElement('div');
+        div.classList.add('boleto');
+        if (boletosVendidos.includes(num)) {
+          div.classList.add('vendido');
+        } else if (boletosEnProceso.includes(num)) {
+          div.classList.add('proceso');
+        } else {
+          div.classList.add('disponible');
+          div.addEventListener('click', () => {
+            if (seleccionados.has(num)) {
+              seleccionados.delete(num);
+              div.style.background = '#1c1c1c';
+            } else {
+              seleccionados.add(num);
+              div.style.background = '#444';
+            }
+            seleccionadosInput.value = Array.from(seleccionados).join(", ");
+          });
+        }
+        div.textContent = num;
+        boletosContainer.appendChild(div);
+      }
+    }
+
+    formulario.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if(seleccionados.size === 0) {
+        alert("Por favor selecciona al menos un boleto.");
+        return;
+      }
+      const nombre = nombreInput.value.trim();
+      const telefono = telefonoInput.value.trim();
+      const boletos = Array.from(seleccionados).join(', ');
+      const mensaje = `Hola, quiero comprar los boletos: ${boletos}.\nMi nombre es ${nombre}, mi teléfono es ${telefono}`;
+      const tuNumero = '5216392331644'; // <-- Tu número de WhatsApp
+      const link = `https://wa.me/${tuNumero}?text=${encodeURIComponent(mensaje)}`;
+      window.open(link, '_blank');
+    });
+
+    crearBotonesBloques();
+  </script>
+</body>
+</html>
