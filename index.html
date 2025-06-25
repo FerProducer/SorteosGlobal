@@ -155,7 +155,6 @@
         const data = await response.json();
         boletosVendidos = data.boletosVendidos || [];
         boletosEnProceso = data.boletosEnProceso || [];
-        mostrarBoletos();
       } catch (error) {
         console.error('Error al obtener los boletos vendidos:', error);
       }
@@ -254,6 +253,7 @@
 
     async function iniciarSistema() {
       await obtenerBoletosDesdeSheets();
+      mostrarBoletos();
     }
 
     iniciarSistema();
