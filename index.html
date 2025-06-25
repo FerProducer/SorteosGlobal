@@ -242,7 +242,7 @@
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ nombre, telefono, boletos })
+        body: JSON.stringify({ nombre, boletos, telefono })
       });
 
       const mensaje = `Hola, quiero comprar los boletos: ${boletos}.\nMi nombre es ${nombre}, mi teléfono es ${telefono}`;
@@ -260,4 +260,5 @@
   </script>
 </body>
 </html>
+
 
