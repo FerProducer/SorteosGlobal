@@ -134,7 +134,6 @@
     <p>&copy; 2025 Sorteo Legal. Todos los derechos reservados.</p>
   </footer>
   <script>
-    const boletosSection = document.getElementById('boletos-section');
     const boletosContainer = document.getElementById('boletos');
     const seleccionadosInput = document.getElementById('seleccionados');
     const formulario = document.getElementById('formulario');
@@ -185,9 +184,7 @@
       paginacionContainer.appendChild(siguiente);
     }
 
-    async function mostrarBoletos() {
-      await obtenerBoletosDesdeSheets();
-
+    function mostrarBoletos() {
       boletosContainer.innerHTML = '';
       const inicio = paginaActual * boletosPorPagina;
       const fin = Math.min(inicio + boletosPorPagina, totalBoletos);
@@ -255,7 +252,8 @@
     });
 
     async function iniciarSistema() {
-      await mostrarBoletos();
+      await obtenerBoletosDesdeSheets();
+      mostrarBoletos();
     }
 
     iniciarSistema();
